@@ -1,8 +1,8 @@
 from fastapi import FastAPI
-from kokoro import TTS
+from kokoro_fastapi import KokoroEngine
 
 app = FastAPI()
-tts = TTS("kokoro-small")   # versão leve pro Railway
+tts = KokoroEngine(model="small")  # versão leve compatível com Railway
 
 @app.get("/")
 def root():
@@ -10,7 +10,7 @@ def root():
 
 @app.get("/speak")
 def speak(text: str):
-    audio = tts.generate(text)
+    audio_b64 = tts.generate_base64(text)
     return {
-        "audio_base64": audio.to_base64()
+        "audio_base64": audio_b64
     }
