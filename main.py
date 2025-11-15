@@ -1,27 +1,21 @@
 from fastapi import FastAPI
 from pydub import AudioSegment
-from kokoro import TTS
+from kokoro_tts import Kokoro
 import base64
 import io
 
 app = FastAPI()
 
-tts = TTS("kokoro")  # modelo original
+tts = Kokoro("am_michael")
 
 @app.post("/speak")
 async def speak(payload: dict):
     text = payload.get("input", "")
     voice = payload.get("voice", "am_michael")
 
-    audio_pcm = tts.generate(text, voice=voice).audio  # PCM WAV raw bytes
+    wav_bytes = tts.generate(text, voice=voice)
 
-    # Converter PCM para MP3 usando pydub
-    wav_audio = AudioSegment(
-        data=audio_pcm,
-        sample_width=2,
-        frame_rate=24000,
-        channels=1
-    )
+    wav_audio = AudioSegment.from_file(io.BytesIO(wav_bytes), format="wav")
     mp3_buffer = io.BytesIO()
     wav_audio.export(mp3_buffer, format="mp3")
     mp3_bytes = mp3_buffer.getvalue()
