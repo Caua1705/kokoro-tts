@@ -1,4 +1,6 @@
-git+https://github.com/Hexgrad/Kokoro-TTS.git
+git+https://github.com/arenapc/kokoro-tts-public.git
 fastapi
 uvicorn[standard]
 pydub
+torch
+transformers
