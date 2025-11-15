@@ -1,25 +1,20 @@
 from fastapi import FastAPI
+from kokoro import TTS
 from pydub import AudioSegment
-from kokoro_tts import Kokoro
 import base64
 import io
 
 app = FastAPI()
+tts = TTS("kokoro-small")
 
-tts = Kokoro("am_michael")
+@app.get("/")
+def root():
+    return {"status": "ok"}
 
-@app.post("/speak")
-async def speak(payload: dict):
-    text = payload.get("input", "")
-    voice = payload.get("voice", "am_michael")
-
-    wav_bytes = tts.generate(text, voice=voice)
-
-    wav_audio = AudioSegment.from_file(io.BytesIO(wav_bytes), format="wav")
-    mp3_buffer = io.BytesIO()
-    wav_audio.export(mp3_buffer, format="mp3")
-    mp3_bytes = mp3_buffer.getvalue()
-
-    audio_base64 = base64.b64encode(mp3_bytes).decode("utf-8")
-
-    return {"audio_base64": audio_base64}
+@app.get("/tts")
+def tts_endpoint(text: str):
+    audio = tts.generate(text)
+    buffer = io.BytesIO()
+    audio.export(buffer, format="mp3")
+    encoded = base64.b64encode(buffer.getvalue()).decode("utf-8")
+    return {"audio": encoded}
